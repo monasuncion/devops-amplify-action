@@ -1,3 +1,5 @@
+name: Deploy Amplify Environment
+
 on:
   workflow_call:
     secrets:
