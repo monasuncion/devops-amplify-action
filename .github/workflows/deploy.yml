@@ -44,7 +44,7 @@ jobs:
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
         name: ${{ steps.env-name.outputs.environment }}
-        template: stack.yml
+        template: $GITHUB_WORKSPACE/stack.yml
         no-fail-on-empty-changeset: "1"
         parameter-overrides: >-
           Name=${{ steps.env-name.outputs.environment }},
