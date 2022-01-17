@@ -36,7 +36,6 @@ jobs:
         # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         role-to-assume: arn:aws:iam::962790378460:role/github-amplify-role
         aws-region: ap-southeast-1
-        role-session-name: GitHubAction
 
     - name: Configure environment name
       id: env-name
