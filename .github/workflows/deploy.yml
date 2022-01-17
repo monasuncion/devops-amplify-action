@@ -43,8 +43,8 @@ jobs:
         REPO: ${{ github.repository }}
       run: |
         BRANCH=`sed -e 's#.*\/\(\)#\1#' <<< $GITHUB_REF`
-        ENVIRONMENT=`echo $REPO | tr "/" "-"`-$BRANCH
         PROJECT=`sed -e 's#.*\/\(\)#\1#' <<< $GITHUB_REPOSITORY`
+        ENVIRONMENT=amplify-$PROJECT-$BRANCH
         echo "Environment name: $ENVIRONMENT"
         echo "Project name: $PROJECT"
         echo "::set-output name=environment::$ENVIRONMENT"
@@ -58,7 +58,7 @@ jobs:
         template: ${{ inputs.STACK }}
         no-fail-on-empty-changeset: "1"
         parameter-overrides: >-
-          Name=${{ steps.env-name.outputs.environment }},
+          Name=amplify-${{ steps.env-name.outputs.environment }},
           Repository=https://github.com/${{ github.repository }},
           Branch=${{ steps.env-name.outputs.branch }},
           OauthToken=${{ secrets.AMPLIFY_TOKEN }},
