@@ -58,7 +58,7 @@ jobs:
         template: ${{ inputs.STACK }}
         no-fail-on-empty-changeset: "1"
         parameter-overrides: >-
-          Name=amplify-${{ steps.env-name.outputs.environment }},
+          Name=${{ steps.env-name.outputs.environment }},
           Repository=https://github.com/${{ github.repository }},
           Branch=${{ steps.env-name.outputs.branch }},
           OauthToken=${{ secrets.AMPLIFY_TOKEN }},
