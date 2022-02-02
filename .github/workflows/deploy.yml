@@ -6,11 +6,14 @@ on:
       STACK:
         required: true
         type: string
+      ROLE_TO_ASSUME: 
+        required: true
+        type: string
+      AWS_REGION: 
+        required: false
+        type: string
+        default: 'ap-southeast-1'
     secrets:
-      AWS_ACCESS_KEY_ID:
-        required: true
-      AWS_SECRET_ACCESS_KEY:
-        required: true
       AMPLIFY_TOKEN:
         required: true
 
@@ -32,10 +35,8 @@ jobs:
       id: creds
       uses: aws-actions/configure-aws-credentials@master
       with:
-        # aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        role-to-assume: arn:aws:iam::962790378460:role/github-amplify-role
-        aws-region: ap-southeast-1
+        role-to-assume: ${{ inputs.ROLE_TO_ASSUME }}
+        aws-region:  ${{ inputs.AWS_REGION }}
 
     - name: Configure environment name
       id: env-name
