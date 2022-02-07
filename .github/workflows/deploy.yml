@@ -45,7 +45,7 @@ jobs:
       run: |
         BRANCH=`sed -e 's#.*\/\(\)#\1#' <<< $GITHUB_REF`
         PROJECT=`sed -e 's#.*\/\(\)#\1#' <<< $GITHUB_REPOSITORY`
-        ENVIRONMENT=amplify-$PROJECT-$BRANCH
+        ENVIRONMENT=$PROJECT-$BRANCH
         echo "Environment name: $ENVIRONMENT"
         echo "Project name: $PROJECT"
         echo "::set-output name=environment::$ENVIRONMENT"
