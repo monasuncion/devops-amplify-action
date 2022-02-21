@@ -81,6 +81,6 @@ jobs:
       env:
         EnvironmentName: ${{ steps.env-name.outputs.environment }}
       run: |
-        AmplifyId=$(aws amplify list-apps --out json | jq -r '.apps[] | select(.name==$EnvironmentName) | .appId')
+        AmplifyId=$(aws amplify list-apps --out json | jq -r '.apps[] | select(.name=="'$EnvironmentName'") | .appId')
         echo $AmplifyId
     
