@@ -50,7 +50,12 @@ jobs:
         BRANCH=`sed -e 's#.*\/\(\)#\1#' <<< $GITHUB_REF`
         PROJECT=`sed -e 's#.*\/\(\)#\1#' <<< $GITHUB_REPOSITORY`
         ENVIRONMENT=$PROJECT-$BRANCH
-        PARAMETER_PREFIX="/$BRANCH/$PROJECT"
+        if [ $BRANCH == "master" ] 
+        then
+          PARAMETER_PREFIX="/production/$PROJECT"
+        else
+          PARAMETER_PREFIX="/develop/$PROJECT"
+        fi
         echo "Environment name: $ENVIRONMENT"
         echo "Project name: $PROJECT"
         echo "::set-output name=environment::$ENVIRONMENT"
