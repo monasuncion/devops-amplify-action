@@ -51,6 +51,7 @@ jobs:
         echo "::set-output name=environment::$ENVIRONMENT"
         echo "::set-output name=project::$PROJECT"
         echo "::set-output name=branch::$BRANCH"
+
     - name: Deploy to Amplify Console with CloudFormation
       id: amplify-stack
       uses: aws-actions/aws-cloudformation-github-deploy@v1
@@ -65,15 +66,17 @@ jobs:
           OauthToken=${{ secrets.AMPLIFY_TOKEN }},
           Domain=${{ secrets.AMPLIFY_DOMAIN }},
           Project=${{ steps.env-name.outputs.project }}
+
     - name: Print default domain
       env:
         DefaultDomain: ${{ steps.amplify-stack.outputs.DefaultDomain }}
       run: |
         echo "Default Domain: $DefaultDomain"
+        
     - name: Amplify App Secrets
+      env:
+        EnvironmentName: ${{ steps.env-name.outputs.environment }}
       run: |
         AmplifyId=$(aws amplify list-apps --out json | jq -r '.apps[] | select(.name==$EnvironmentName) | .appId')
         echo $AmplifyId
-      env:
-        EnvironmentName: ${{ steps.env-name.outputs.environment }}
     
