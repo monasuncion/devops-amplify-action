@@ -70,3 +70,10 @@ jobs:
         DefaultDomain: ${{ steps.amplify-stack.outputs.DefaultDomain }}
       run: |
         echo "Default Domain: $DefaultDomain"
+    - name: Amplify App Secrets
+      run: |
+        AmplifyId=$(aws amplify list-apps --out json | jq -r '.apps[] | select(.name==$EnvironmentName) | .appId')
+        echo $AmplifyId
+      env:
+        EnvironmentName: ${{ steps.env-name.outputs.environment }}
+    
