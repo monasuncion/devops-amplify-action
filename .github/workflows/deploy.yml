@@ -85,6 +85,7 @@ jobs:
         PARAM_PREFIX: ${{ steps.env-name.outputs.prameterPrefix }}
       run: |
         export AMPLIFY_ID=$(aws amplify list-apps --out json | jq -r '.apps[] | select(.name=="'$EnvironmentName'") | .appId')
+        ls -la
         chmod +x ./scripts/generate-secrets.sh
         ./scripts/generate-secrets.sh
       shell: bash
