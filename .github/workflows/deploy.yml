@@ -69,10 +69,10 @@ jobs:
 
     - name: Print default domain
       env:
-        DefaultDomain: ${{ steps.amplify-stack.outputs.DefaultDomain }}
+        DefaultDomain: ${{ steps.amplify-stack.outputs.Domain }}
       run: |
         echo "Default Domain: $DefaultDomain"
-        
+
     - name: Amplify App Secrets
       env:
         EnvironmentName: ${{ steps.env-name.outputs.environment }}
