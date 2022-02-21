@@ -80,12 +80,12 @@ jobs:
         [[ DefaultDomain != '' ]] && echo "Default Domain: $DefaultDomain" || echo "Default Domain: None"
 
     - name: Amplify App Secrets
-      uses: ./
       env:
         EnvironmentName: ${{ steps.env-name.outputs.environment }}
         PARAM_PREFIX: ${{ steps.env-name.outputs.prameterPrefix }}
       run: |
         export AMPLIFY_ID=$(aws amplify list-apps --out json | jq -r '.apps[] | select(.name=="'$EnvironmentName'") | .appId')
+        ls -la github/workflows/
         ./.github/workflows/scripts/generate-secrets.sh
       shell: bash
     
