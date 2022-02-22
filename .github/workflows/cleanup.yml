@@ -11,11 +11,10 @@ on:
         required: false
         type: string
         default: ''
-      ROLE_TO_ASSUME: 
-        required: true
-        type: string
     secrets:
       AMPLIFY_TOKEN:
+        required: true
+      ROLE_TO_ASSUME: 
         required: true
 
 jobs:
@@ -31,7 +30,7 @@ jobs:
       id: creds
       uses: aws-actions/configure-aws-credentials@master
       with:
-        role-to-assume: ${{ inputs.ROLE_TO_ASSUME }}
+        role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
         aws-region:  ${{ inputs.AWS_REGION }}
 
     - name: Configure environment name
