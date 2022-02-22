@@ -16,10 +16,8 @@ on:
         required: true
       STACK:
         required: true
-        type: string
       ROLE_TO_ASSUME: 
         required: true
-        type: string
 
 permissions:
   id-token: write

@@ -16,7 +16,6 @@ on:
         required: true
       ROLE_TO_ASSUME: 
         required: true
-        type: string
 
 jobs:
   amplify:
