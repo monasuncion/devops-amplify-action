@@ -108,6 +108,7 @@ jobs:
 
             for backend in "${backend_environment_list[@]}"
             do  
+                echo "/amplify/$AMPLIFY_ID/$backend/$parameter_name"
                 aws ssm put-parameter --overwrite --name "/amplify/$AMPLIFY_ID/$backend/$parameter_name" --value "$secrets_value" --type "SecureString"
             done
         done
