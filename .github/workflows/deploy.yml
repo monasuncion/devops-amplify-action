@@ -13,6 +13,10 @@ on:
         required: false
         type: string
         default: 'ap-southeast-1'
+      AMPLIFY_DOMAIN:
+        required: false
+        type: string
+        default: ''
     secrets:
       AMPLIFY_TOKEN:
         required: true
@@ -46,11 +50,14 @@ jobs:
         BRANCH=`sed -e 's#.*\/\(\)#\1#' <<< $GITHUB_REF`
         PROJECT=`sed -e 's#.*\/\(\)#\1#' <<< $GITHUB_REPOSITORY`
         ENVIRONMENT=$PROJECT-$BRANCH
+        PARAMETER_PREFIX="/$BRANCH/$PROJECT"
         echo "Environment name: $ENVIRONMENT"
         echo "Project name: $PROJECT"
         echo "::set-output name=environment::$ENVIRONMENT"
         echo "::set-output name=project::$PROJECT"
         echo "::set-output name=branch::$BRANCH"
+        echo "::set-output name=prameterPrefix::$PARAMETER_PREFIX"
+
     - name: Deploy to Amplify Console with CloudFormation
       id: amplify-stack
       uses: aws-actions/aws-cloudformation-github-deploy@v1
@@ -63,10 +70,47 @@ jobs:
           Repository=https://github.com/${{ github.repository }},
           Branch=${{ steps.env-name.outputs.branch }},
           OauthToken=${{ secrets.AMPLIFY_TOKEN }},
-          Domain=${{ secrets.AMPLIFY_DOMAIN }},
+          Domain=${{ inputs.AMPLIFY_DOMAIN }},
           Project=${{ steps.env-name.outputs.project }}
+
     - name: Print default domain
       env:
         DefaultDomain: ${{ steps.amplify-stack.outputs.DefaultDomain }}
       run: |
-        echo "Default Domain: $DefaultDomain"
+        [[ $DefaultDomain != '' ]] && echo "Default Domain: $DefaultDomain" || echo "Default Domain: None"
+
+    - name: Amplify App Secrets
+      env:
+        EnvironmentName: ${{ steps.env-name.outputs.environment }}
+        PARAM_PREFIX: ${{ steps.env-name.outputs.prameterPrefix }}
+        BRANCH: ${{ steps.env-name.outputs.branch }}
+        PROJECT: ${{ steps.env-name.outputs.project }}
+      run: |
+        export AMPLIFY_ID=$(aws amplify list-apps --out json | jq -r '.apps[] | select(.name=="'$EnvironmentName'") | .appId')
+        
+        if [ $BRANCH == "master" ] 
+        then
+          PARAM_PREFIX="/production/$PROJECT"
+        else
+          PARAM_PREFIX="/develop/$PROJECT"
+        fi
+        
+        secrets=$(aws ssm describe-parameters --parameter-filters Key=Name,Option=BeginsWith,Values=$PARAM_PREFIX | jq -r '.Parameters[] | .Name')
+        backend_environments=$(aws amplify list-backend-environments --app-id $AMPLIFY_ID | jq -r .backendEnvironments[] | jq -r .environmentName)
+
+        secrets_list=(`echo $secrets | sed 's/" "/\n/g'`)
+        backend_environment_list=(`echo $backend_environments | sed 's/" "/\n/g'`)
+
+        for secret in "${secrets_list[@]}"
+        do
+            secrets_value=$(aws ssm get-parameter --name $secret --with-decryption | jq -r '.Parameter | .Value')
+            parameter_name=$(echo $secret | sed -e 's/\/.*\///g')
+
+            for backend in "${backend_environment_list[@]}"
+            do  
+                echo "/amplify/$AMPLIFY_ID/$backend/$parameter_name"
+                aws ssm put-parameter --overwrite --name "/amplify/$AMPLIFY_ID/$backend/$parameter_name" --value "$secrets_value" --type "SecureString"
+            done
+        done
+      shell: bash
+    
