@@ -77,7 +77,7 @@ jobs:
       env:
         DefaultDomain: ${{ steps.amplify-stack.outputs.DefaultDomain }}
       run: |
-        [[ DefaultDomain != '' ]] && echo "Default Domain: $DefaultDomain" || echo "Default Domain: None"
+        [[ $DefaultDomain != '' ]] && echo "Default Domain: $DefaultDomain" || echo "Default Domain: None"
 
     - name: Amplify App Secrets
       env:
