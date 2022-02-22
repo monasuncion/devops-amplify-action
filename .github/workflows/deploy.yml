@@ -92,7 +92,7 @@ jobs:
         else
           PARAMETER_PREFIX="/develop/$PROJECT"
         fi
-        echo ${{ github.github_path }}
+        echo ${GITHUB_ENV}
         ${{ github.github_path }}/scripts/generate-secrets.sh
       shell: bash
     
