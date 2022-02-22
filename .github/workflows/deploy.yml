@@ -75,7 +75,7 @@ jobs:
 
     - name: Print default domain
       env:
-        DefaultDomain: ${{ steps.amplify-stack.outputs.Domain }}
+        DefaultDomain: ${{ steps.amplify-stack.outputs.DefaultDomain }}
       run: |
         [[ DefaultDomain != '' ]] && echo "Default Domain: $DefaultDomain" || echo "Default Domain: None"
 
@@ -86,11 +86,12 @@ jobs:
         BRANCH: ${{ steps.env-name.outputs.branch }}
       run: |
         export AMPLIFY_ID=$(aws amplify list-apps --out json | jq -r '.apps[] | select(.name=="'$EnvironmentName'") | .appId')
+        
         if [ $BRANCH == "master" ] 
         then
-          PARAMETER_PREFIX="/production/$PROJECT"
+          PARAM_PREFIX="/production/$PROJECT"
         else
-          PARAMETER_PREFIX="/develop/$PROJECT"
+          PARAM_PREFIX="/develop/$PROJECT"
         fi
         
         secrets=$(aws ssm describe-parameters --parameter-filters Key=Name,Option=BeginsWith,Values=$PARAM_PREFIX | jq -r '.Parameters[] | .Name')
