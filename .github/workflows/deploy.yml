@@ -84,6 +84,7 @@ jobs:
         EnvironmentName: ${{ steps.env-name.outputs.environment }}
         PARAM_PREFIX: ${{ steps.env-name.outputs.prameterPrefix }}
         BRANCH: ${{ steps.env-name.outputs.branch }}
+        PROJECT: ${{ steps.env-name.outputs.project }}
       run: |
         export AMPLIFY_ID=$(aws amplify list-apps --out json | jq -r '.apps[] | select(.name=="'$EnvironmentName'") | .appId')
         
