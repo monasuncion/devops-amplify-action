@@ -39,7 +39,7 @@ jobs:
       id: creds
       uses: aws-actions/configure-aws-credentials@master
       with:
-        role-to-assume: ${{ inputs.ROLE_TO_ASSUME }}
+        role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
         aws-region:  ${{ inputs.AWS_REGION }}
 
     - name: Configure environment name
@@ -63,7 +63,7 @@ jobs:
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
         name: ${{ steps.env-name.outputs.environment }}
-        template: ${{ inputs.STACK }}
+        template: ${{ secrets.STACK }}
         no-fail-on-empty-changeset: "1"
         parameter-overrides: >-
           Name=${{ steps.env-name.outputs.environment }},
