@@ -3,12 +3,6 @@ name: Deploy Amplify Environment
 on:
   workflow_call:
     inputs:
-      STACK:
-        required: true
-        type: string
-      ROLE_TO_ASSUME: 
-        required: true
-        type: string
       AWS_REGION: 
         required: false
         type: string
@@ -20,6 +14,12 @@ on:
     secrets:
       AMPLIFY_TOKEN:
         required: true
+      STACK:
+        required: true
+        type: string
+      ROLE_TO_ASSUME: 
+        required: true
+        type: string
 
 permissions:
   id-token: write
