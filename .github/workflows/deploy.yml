@@ -11,6 +11,10 @@ on:
         required: false
         type: string
         default: ''
+      CORS_PARAM:
+        required: false
+        type: string
+        default: '/applabs/cors/allowedOrigins'
     secrets:
       AMPLIFY_TOKEN:
         required: true
@@ -49,6 +53,7 @@ jobs:
         PROJECT=`sed -e 's#.*\/\(\)#\1#' <<< $GITHUB_REPOSITORY`
         ENVIRONMENT=$PROJECT-$BRANCH
         PARAMETER_PREFIX="/$BRANCH/$PROJECT"
+
         echo "Environment name: $ENVIRONMENT"
         echo "Project name: $PROJECT"
         echo "::set-output name=environment::$ENVIRONMENT"
@@ -61,7 +66,7 @@ jobs:
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
         name: ${{ steps.env-name.outputs.environment }}
-        template: ${{ secrets.STACK }}
+        template: s3://smic-applabs-amplify-testing/stack-v2.yml
         no-fail-on-empty-changeset: "1"
         parameter-overrides: >-
           Name=${{ steps.env-name.outputs.environment }},
@@ -111,4 +116,24 @@ jobs:
             done
         done
       shell: bash
+
+    - name: Update CORS
+      env:
+        DOMAIN: ${{ steps.amplify-stack.outputs.DefaultDomain }}
+        CORS_PARAM: ${{ inputs.CORS_PARAM }}
+      run: |
+        cors_list=$(aws ssm get-parameter --name $CORS_PARAM | jq -r ''.Parameter | .Value')
+
+        [[ $cors_list =~ .*"$DOMAIN".* ]] && exit 0
+        
+        cors_list+=",$DOMAIN"
+        aws ssm put-parameter --name $CORS_PARAM --value $cors_list --type "String" --overwrite
+        
+        echo $Domain
+        echo $CORS_PARAM
+        echo $cors_list
+
+
+
+
     
