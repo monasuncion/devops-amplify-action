@@ -133,7 +133,7 @@ jobs:
         
         cors_list+=",$DOMAIN"
         aws ssm put-parameter --name $CORS_PARAM --value $cors_list --type "String" --overwrite
-        aws lambda update-function-configuration --function-name $CORS_HANDLER --environment "AllowedOrigins=$updated_cors_list"
+        aws lambda update-function-configuration --function-name $CORS_HANDLER --environment "AllowedOrigins=$cors_list"
         
         echo $cors_list
 
