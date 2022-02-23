@@ -15,6 +15,10 @@ on:
         required: false
         type: string
         default: '/applabs/cors/allowedOrigins'
+      CORS_HANDLER:
+        required: false
+        type: string
+        default: 'applabs-cors-handler'
     secrets:
       AMPLIFY_TOKEN:
         required: true
@@ -102,6 +106,7 @@ jobs:
     - name: Update CORS
       env:
         CORS_PARAM: ${{ inputs.CORS_PARAM }}
+        CORS_HANDLER: ${{ inputs.CORS_HANDLER }}
       run: |
         cors_list=$(aws ssm get-parameter --name $CORS_PARAM | jq -r '.Parameter | .Value')
 
@@ -110,6 +115,7 @@ jobs:
         updated_cors_list=$(echo $cors_list | sed "s/,$AMPLIFY_DOMAIN//g")
 
         aws ssm put-parameter --name $CORS_PARAM --value $updated_cors_list --type "String" --overwrite
+        aws lambda update-function-configuration --function-name $CORS_HANDLER --environment AllowedOrigins=$updated_cors_list
         
         echo $cors_list
 
