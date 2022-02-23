@@ -81,13 +81,13 @@ jobs:
         secrets=$(aws ssm describe-parameters --parameter-filters Key=Name,Option=BeginsWith,Values=$PARAM_PREFIX | jq -r '.Parameters[] | .Name')
         backend_environments=$(aws amplify list-backend-environments --app-id $AMPLIFY_ID | jq -r .backendEnvironments[] | jq -r .environmentName)
 
-        secrets_list=$(echo $secrets | sed 's/" "/\n/g')
-        backend_environment_list=$(echo $backend_environments | sed 's/" "/\n/g')
+        secrets_list=`echo $secrets | sed 's/" "/\n/g'`
+        backend_environment_list=`echo $backend_environments | sed 's/" "/\n/g'`
 
         for secret in "${secrets_list[@]}"
         do
             secrets_value=$(aws ssm get-parameter --name $secret --with-decryption | jq -r '.Parameter | .Value')
-            parameter_name=$(cat $secret | sed -e 's/\/.*\///g')
+            parameter_name=`echo $secret | sed -e 's/\/.*\///g'`
 
             for backend in "${backend_environment_list[@]}"
             do  
@@ -107,7 +107,7 @@ jobs:
 
         [[ ! $cors_list =~ .*"$AMPLIFY_DOMAIN".* ]] && exit 0
         
-        updated_cors_list=$(cat $cors_list | sed "s/,$AMPLIFY_DOMAIN//g")
+        updated_cors_list=`echo $cors_list | sed "s/,$AMPLIFY_DOMAIN//g"`
 
         aws ssm put-parameter --name $CORS_PARAM --value $updated_cors_list --type "String" --overwrite
         
