@@ -122,7 +122,7 @@ jobs:
         DOMAIN: ${{ steps.amplify-stack.outputs.DefaultDomain }}
         CORS_PARAM: ${{ inputs.CORS_PARAM }}
       run: |
-        cors_list=$(aws ssm get-parameter --name $CORS_PARAM | jq -r .Parameter | .Value')
+        cors_list=$(aws ssm get-parameter --name $CORS_PARAM | jq -r '.Parameter | .Value')
 
         [[ $cors_list =~ .*"$DOMAIN".* ]] && exit 0
         
