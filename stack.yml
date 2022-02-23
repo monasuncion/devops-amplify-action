@@ -75,4 +75,3 @@ Resources:
 Outputs:
   DefaultDomain:
     Value: !GetAtt AmplifyApp.DefaultDomain
-    Condition: UseCustomDomain

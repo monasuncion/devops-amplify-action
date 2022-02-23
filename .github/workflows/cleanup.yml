@@ -11,6 +11,10 @@ on:
         required: false
         type: string
         default: ''
+      CORS_PARAM:
+        required: false
+        type: string
+        default: '/applabs/cors/allowedOrigins'
     secrets:
       AMPLIFY_TOKEN:
         required: true
@@ -63,7 +67,9 @@ jobs:
         BRANCH: ${{ steps.env-name.outputs.branch }}
         PROJECT: ${{ steps.env-name.outputs.project }}
       run: |
-        export AMPLIFY_ID=$(aws amplify list-apps --out json | jq -r '.apps[] | select(.name=="'$EnvironmentName'") | .appId')
+        AMPLIFY_INFO=$(aws amplify list-apps --out json | jq -r '.apps[] | select(.name=="'$EnvironmentName'")'
+        AMPLIFY_ID=$(echo $AMPLIFY_INFO | jq -r '.apps[] | select(.name=="'$EnvironmentName'") | .appId')
+        AMPLIFY_DOMAIN=$(echo $AMPLIFY_INFO | jq -r '.apps[] | select(.name=="'$EnvironmentName'") | .defaultDomain')
         
         if [ $BRANCH == "master" ] 
         then
@@ -75,13 +81,13 @@ jobs:
         secrets=$(aws ssm describe-parameters --parameter-filters Key=Name,Option=BeginsWith,Values=$PARAM_PREFIX | jq -r '.Parameters[] | .Name')
         backend_environments=$(aws amplify list-backend-environments --app-id $AMPLIFY_ID | jq -r .backendEnvironments[] | jq -r .environmentName)
 
-        secrets_list=(`echo $secrets | sed 's/" "/\n/g'`)
-        backend_environment_list=(`echo $backend_environments | sed 's/" "/\n/g'`)
+        secrets_list=$(echo $secrets | sed 's/" "/\n/g')
+        backend_environment_list=$(echo $backend_environments | sed 's/" "/\n/g')
 
         for secret in "${secrets_list[@]}"
         do
             secrets_value=$(aws ssm get-parameter --name $secret --with-decryption | jq -r '.Parameter | .Value')
-            parameter_name=$(echo $secret | sed -e 's/\/.*\///g')
+            parameter_name=$(cat $secret | sed -e 's/\/.*\///g')
 
             for backend in "${backend_environment_list[@]}"
             do  
@@ -89,6 +95,22 @@ jobs:
                 aws ssm delete-parameter --name "/amplify/$AMPLIFY_ID/$backend/$parameter_name"
             done
         done
+
+        echo "AMPLIFY_DOMAIN=$AMPLIFY_DOMAIN" >> $GITHUB_ENV
       shell: bash
+
+    - name: Update CORS
+      env:
+        CORS_PARAM: ${{ inputs.CORS_PARAM }}
+      run: |
+        cors_list=$(aws ssm get-parameter --name $CORS_PARAM | jq -r '.Parameter | .Value')
+
+        [[ ! $cors_list =~ .*"$AMPLIFY_DOMAIN".* ]] && exit 0
+        
+        updated_cors_list=$(cat $cors_list | sed "s/,$AMPLIFY_DOMAIN//g")
+
+        aws ssm put-parameter --name $CORS_PARAM --value $updated_cors_list --type "String" --overwrite
+        
+        echo $cors_list
 
     
