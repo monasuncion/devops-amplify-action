@@ -70,7 +70,7 @@ jobs:
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
         name: ${{ steps.env-name.outputs.environment }}
-        template: https://s3.amazonaws.com/smic-applabs-amplify-testing/stack-v2.yml
+        template: ${{ secrets.STACK }}
         no-fail-on-empty-changeset: "1"
         parameter-overrides: >-
           Name=${{ steps.env-name.outputs.environment }},
