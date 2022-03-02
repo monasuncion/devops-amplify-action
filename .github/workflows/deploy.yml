@@ -131,8 +131,10 @@ jobs:
         cors_list+=",$DOMAIN"
         aws ssm put-parameter --name $CORS_PARAM --value $cors_list --type "String" --overwrite
 
-        revision_id=$(aws lambda get-function-configuration --function-name $CORS_HANDLER | jq -r '. | .RevisionId')
-        aws lambda update-function-configuration --function-name $CORS_HANDLER --revision-id $revision_id --environment "Variables={AllowedOrigins='$cors_list'}"
+        lambda_config=$(aws lambda get-function-configuration --function-name $CORS_HANDLER)
+        revision_id=$(echo $lambda_config | jq -r '. | .RevisionId')
+        allowed_headers=$(echo $lambda_config | jq -r '.Environment.Variables | .AllowedHeaders')
+        aws lambda update-function-configuration --function-name $CORS_HANDLER --revision-id $revision_id --environment "Variables={AllowedOrigins='$cors_list',AllowedHeaders='$allowed_headers'}"
 
 
 
