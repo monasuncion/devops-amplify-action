@@ -60,7 +60,7 @@ jobs:
       env:
         stackName: ${{ steps.env-name.outputs.environment }}
       run: |
-        aws cloudformation delete-stack $stackName
+        aws cloudformation delete-stack --stack-name $stackName
 
     - name: Amplify App Secrets
       env:
