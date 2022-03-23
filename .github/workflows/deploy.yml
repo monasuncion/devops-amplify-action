@@ -56,7 +56,6 @@ jobs:
         BRANCH=`sed -e 's#.*\/\(\)#\1#' <<< $GITHUB_REF`
         PROJECT=`sed -e 's#.*\/\(\)#\1#' <<< $GITHUB_REPOSITORY`
         ENVIRONMENT=$PROJECT-$BRANCH
-
         echo "Environment name: $ENVIRONMENT"
         echo "Project name: $PROJECT"
         echo "::set-output name=environment::$ENVIRONMENT"
@@ -92,7 +91,7 @@ jobs:
       run: |
         export AMPLIFY_ID=$(aws amplify list-apps --out json | jq -r '.apps[] | select(.name=="'$EnvironmentName'") | .appId')
         
-        if [ $BRANCH == "master" ] || [ $BRANCH == "amplify-prod-deploy" ]
+        if [ $BRANCH == "master" ] 
         then
           PARAM_PREFIX="/production/$PROJECT"
         else
