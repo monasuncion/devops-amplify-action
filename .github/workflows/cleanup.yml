@@ -11,8 +11,6 @@ on:
         required: false
         type: string
         default: ''
-<<<<<<< HEAD
-=======
       CORS_PARAM:
         required: false
         type: string
@@ -21,26 +19,18 @@ on:
         required: false
         type: string
         default: 'applabs-cors-handler'
->>>>>>> develop
     secrets:
       AMPLIFY_TOKEN:
         required: true
-      STACK:
-        required: true
       ROLE_TO_ASSUME: 
         required: true
-
-permissions:
-  id-token: write
-  contents: read
 
 jobs:
   amplify:
     name: Deploy to Amplify Console
     runs-on: ubuntu-latest
-    outputs:
-      env-name: ${{ steps.env-name.outputs.environment }}
     steps:
+
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -59,63 +49,34 @@ jobs:
         BRANCH=`sed -e 's#.*\/\(\)#\1#' <<< $GITHUB_REF`
         PROJECT=`sed -e 's#.*\/\(\)#\1#' <<< $GITHUB_REPOSITORY`
         ENVIRONMENT=$PROJECT-$BRANCH
-<<<<<<< HEAD
-        PARAMETER_PREFIX="/$BRANCH/$PROJECT"
-=======
-
->>>>>>> develop
         echo "Environment name: $ENVIRONMENT"
         echo "Project name: $PROJECT"
         echo "::set-output name=environment::$ENVIRONMENT"
         echo "::set-output name=project::$PROJECT"
         echo "::set-output name=branch::$BRANCH"
-<<<<<<< HEAD
-        echo "::set-output name=prameterPrefix::$PARAMETER_PREFIX"
-=======
->>>>>>> develop
 
-    - name: Deploy to Amplify Console with CloudFormation
+    - name: Delete Amplify Cloudformation Stack 
       id: amplify-stack
-      uses: aws-actions/aws-cloudformation-github-deploy@v1
-      with:
-        name: ${{ steps.env-name.outputs.environment }}
-        template: ${{ secrets.STACK }}
-        no-fail-on-empty-changeset: "1"
-        parameter-overrides: >-
-          Name=${{ steps.env-name.outputs.environment }},
-          Repository=https://github.com/${{ github.repository }},
-          Branch=${{ steps.env-name.outputs.branch }},
-          OauthToken=${{ secrets.AMPLIFY_TOKEN }},
-          Domain=${{ inputs.AMPLIFY_DOMAIN }},
-          Project=${{ steps.env-name.outputs.project }}
-
-    - name: Print default domain
       env:
-        DefaultDomain: ${{ steps.amplify-stack.outputs.DefaultDomain }}
+        stackName: ${{ steps.env-name.outputs.environment }}
       run: |
-        [[ $DefaultDomain != '' ]] && echo "Default Domain: $DefaultDomain" || echo "Default Domain: None"
+        aws cloudformation delete-stack --stack-name $stackName
 
     - name: Amplify App Secrets
       env:
         EnvironmentName: ${{ steps.env-name.outputs.environment }}
-<<<<<<< HEAD
-        PARAM_PREFIX: ${{ steps.env-name.outputs.prameterPrefix }}
-=======
->>>>>>> develop
         BRANCH: ${{ steps.env-name.outputs.branch }}
         PROJECT: ${{ steps.env-name.outputs.project }}
       run: |
-        export AMPLIFY_ID=$(aws amplify list-apps --out json | jq -r '.apps[] | select(.name=="'$EnvironmentName'") | .appId')
+        AMPLIFY_INFO=$(aws amplify list-apps --out json | jq -r '.apps[] | select(.name=="'$EnvironmentName'")'
+        AMPLIFY_ID=$(echo $AMPLIFY_INFO | jq -r '.apps[] | select(.name=="'$EnvironmentName'") | .appId')
+        AMPLIFY_DOMAIN=$(echo $AMPLIFY_INFO | jq -r '.apps[] | select(.name=="'$EnvironmentName'") | .defaultDomain')
         
-<<<<<<< HEAD
         if [ $BRANCH == "master" ] 
-=======
-        if [ $BRANCH == "master" ] || [ $BRANCH == "amplify-prod-deploy" ]
->>>>>>> develop
         then
-          PARAM_PREFIX="/production/$PROJECT"
+          PARAM_PREFIX="/production/$AMPLIFY_ID"
         else
-          PARAM_PREFIX="/develop/$PROJECT"
+          PARAM_PREFIX="/develop/$AMPLIFY_ID"
         fi
         
         secrets=$(aws ssm describe-parameters --parameter-filters Key=Name,Option=BeginsWith,Values=$PARAM_PREFIX | jq -r '.Parameters[] | .Name')
@@ -131,38 +92,27 @@ jobs:
 
             for backend in "${backend_environment_list[@]}"
             do  
-                echo "/amplify/$AMPLIFY_ID/$backend/$parameter_name"
-<<<<<<< HEAD
-                aws ssm put-parameter --overwrite --name "/amplify/$AMPLIFY_ID/$backend/$parameter_name" --value "$secrets_value" --type "SecureString"
+                echo "Deleting /amplify/$AMPLIFY_ID/$backend/$parameter_name"
+                aws ssm delete-parameter --name "/amplify/$AMPLIFY_ID/$backend/$parameter_name"
             done
         done
-      shell: bash
-=======
-                aws ssm put-parameter --overwrite --name "/amplify/$AMPLIFY_ID/$backend/$parameter_name" --value "$secrets_value" --type "SecureString" 
-            done
-        done
+
+        echo "AMPLIFY_DOMAIN=$AMPLIFY_DOMAIN" >> $GITHUB_ENV
       shell: bash
 
     - name: Update CORS
       env:
-        DOMAIN: ${{ steps.amplify-stack.outputs.DefaultDomain }}
         CORS_PARAM: ${{ inputs.CORS_PARAM }}
         CORS_HANDLER: ${{ inputs.CORS_HANDLER }}
       run: |
         cors_list=$(aws ssm get-parameter --name $CORS_PARAM | jq -r '.Parameter | .Value')
 
-        [[ $cors_list =~ .*"$DOMAIN".* ]] && exit 0
+        [[ ! $cors_list =~ .*"$AMPLIFY_DOMAIN".* ]] && exit 0
         
-        cors_list+=",$DOMAIN"
-        aws ssm put-parameter --name $CORS_PARAM --value $cors_list --type "String" --overwrite
+        updated_cors_list=$(echo $cors_list | sed "s/,$AMPLIFY_DOMAIN//g")
+        aws ssm put-parameter --name $CORS_PARAM --value $updated_cors_list --type "String" --overwrite
 
         lambda_config=$(aws lambda get-function-configuration --function-name $CORS_HANDLER)
         revision_id=$(echo $lambda_config | jq -r '. | .RevisionId')
         allowed_headers=$(echo $lambda_config | jq -r '.Environment.Variables | .AllowedHeaders')
         aws lambda update-function-configuration --function-name $CORS_HANDLER --revision-id $revision_id --environment "Variables={AllowedOrigins='$cors_list',AllowedHeaders='$allowed_headers'}"
-
-
-
-
->>>>>>> develop
-    
