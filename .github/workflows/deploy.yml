@@ -11,8 +11,6 @@ on:
         required: false
         type: string
         default: ''
-<<<<<<< HEAD
-=======
       CORS_PARAM:
         required: false
         type: string
@@ -21,7 +19,6 @@ on:
         required: false
         type: string
         default: 'applabs-cors-handler'
->>>>>>> develop
     secrets:
       AMPLIFY_TOKEN:
         required: true
@@ -59,20 +56,11 @@ jobs:
         BRANCH=`sed -e 's#.*\/\(\)#\1#' <<< $GITHUB_REF`
         PROJECT=`sed -e 's#.*\/\(\)#\1#' <<< $GITHUB_REPOSITORY`
         ENVIRONMENT=$PROJECT-$BRANCH
-<<<<<<< HEAD
-        PARAMETER_PREFIX="/$BRANCH/$PROJECT"
-=======
-
->>>>>>> develop
         echo "Environment name: $ENVIRONMENT"
         echo "Project name: $PROJECT"
         echo "::set-output name=environment::$ENVIRONMENT"
         echo "::set-output name=project::$PROJECT"
         echo "::set-output name=branch::$BRANCH"
-<<<<<<< HEAD
-        echo "::set-output name=prameterPrefix::$PARAMETER_PREFIX"
-=======
->>>>>>> develop
 
     - name: Deploy to Amplify Console with CloudFormation
       id: amplify-stack
@@ -98,20 +86,12 @@ jobs:
     - name: Amplify App Secrets
       env:
         EnvironmentName: ${{ steps.env-name.outputs.environment }}
-<<<<<<< HEAD
-        PARAM_PREFIX: ${{ steps.env-name.outputs.prameterPrefix }}
-=======
->>>>>>> develop
         BRANCH: ${{ steps.env-name.outputs.branch }}
         PROJECT: ${{ steps.env-name.outputs.project }}
       run: |
         export AMPLIFY_ID=$(aws amplify list-apps --out json | jq -r '.apps[] | select(.name=="'$EnvironmentName'") | .appId')
         
-<<<<<<< HEAD
         if [ $BRANCH == "master" ] 
-=======
-        if [ $BRANCH == "master" ] || [ $BRANCH == "amplify-prod-deploy" ]
->>>>>>> develop
         then
           PARAM_PREFIX="/production/$PROJECT"
         else
@@ -132,12 +112,6 @@ jobs:
             for backend in "${backend_environment_list[@]}"
             do  
                 echo "/amplify/$AMPLIFY_ID/$backend/$parameter_name"
-<<<<<<< HEAD
-                aws ssm put-parameter --overwrite --name "/amplify/$AMPLIFY_ID/$backend/$parameter_name" --value "$secrets_value" --type "SecureString"
-            done
-        done
-      shell: bash
-=======
                 aws ssm put-parameter --overwrite --name "/amplify/$AMPLIFY_ID/$backend/$parameter_name" --value "$secrets_value" --type "SecureString" 
             done
         done
@@ -164,5 +138,4 @@ jobs:
 
 
 
->>>>>>> develop
     
