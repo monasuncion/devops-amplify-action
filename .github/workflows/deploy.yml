@@ -91,7 +91,7 @@ jobs:
       run: |
         export AMPLIFY_ID=$(aws amplify list-apps --out json | jq -r '.apps[] | select(.name=="'$EnvironmentName'") | .appId')
         
-        if [ $BRANCH == "master" ] 
+        if [ $BRANCH == "master" ] || [ $BRANCH == "staging" ] || [ $BRANCH == "amplify-prod-deploy" ]
         then
           PARAM_PREFIX="/production/$PROJECT"
         else

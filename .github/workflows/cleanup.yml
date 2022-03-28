@@ -72,7 +72,7 @@ jobs:
         AMPLIFY_ID=$(echo $AMPLIFY_INFO | jq -r '.apps[] | select(.name=="'$EnvironmentName'") | .appId')
         AMPLIFY_DOMAIN=$(echo $AMPLIFY_INFO | jq -r '.apps[] | select(.name=="'$EnvironmentName'") | .defaultDomain')
         
-        if [ $BRANCH == "master" ] 
+        if [ $BRANCH == "master" ] || [ $BRANCH == "staging" ]
         then
           PARAM_PREFIX="/production/$AMPLIFY_ID"
         else
