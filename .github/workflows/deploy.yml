@@ -19,6 +19,9 @@ on:
         required: false
         type: string
         default: 'applabs-cors-handler'
+      AMPLIFY_WEBHOOK_ID:
+        type: string
+        required: false
     secrets:
       AMPLIFY_TOKEN:
         required: true
@@ -26,6 +29,8 @@ on:
         required: true
       ROLE_TO_ASSUME: 
         required: true
+      AMPLIFY_WEBHOOK_TOKEN:
+        required: false
 
 permissions:
   id-token: write
@@ -135,6 +140,14 @@ jobs:
         allowed_headers=$(echo $lambda_config | jq -r '.Environment.Variables | .AllowedHeaders')
         aws lambda update-function-configuration --function-name $CORS_HANDLER --revision-id $revision_id --environment "Variables={AllowedOrigins='$cors_list',AllowedHeaders='$allowed_headers'}"
 
+    - name: Trigger Amplify Deployment
+      if: "${{ github.event.inputs.AMPLIFY_WEBHOOK_ID != '' }}"
+      env:
+        AMPLIFY_WEBHOOK_TOKEN: ${{ secrets.AMPLIFY_WEBHOOK_TOKEN }}
+        AMPLIFY_WEBHOOK_ID: ${{ inputs.AMPLIFY_WEBHOOK_ID }}
+        AWS-REGION:  ${{ inputs.AWS_REGION }}
+      run: |
+        curl -X POST -d {} "https://webhooks.amplify.$AWS-REGION.amazonaws.com/prod/webhooks?id=$AMPLIFY_WEBHOOK_ID&token=$AMPLIFY_WEBHOOK_TOKEN&operation=startbuild" -H "Content-Type:application/json"
 
 
 
