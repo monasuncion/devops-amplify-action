@@ -141,7 +141,7 @@ jobs:
         aws lambda update-function-configuration --function-name $CORS_HANDLER --revision-id $revision_id --environment "Variables={AllowedOrigins='$cors_list',AllowedHeaders='$allowed_headers'}"
 
     - name: Trigger Amplify Deployment
-      if: github.event.inputs.AMPLIFY_WEBHOOK_ID != ''
+      if: ${{github.event.inputs.AMPLIFY_WEBHOOK_ID != ''}}
       env:
         AMPLIFY_WEBHOOK_TOKEN: ${{ secrets.AMPLIFY_WEBHOOK_TOKEN }}
         AMPLIFY_WEBHOOK_ID: ${{ inputs.AMPLIFY_WEBHOOK_ID }}
