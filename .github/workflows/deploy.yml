@@ -147,7 +147,7 @@ jobs:
         AMPLIFY_WEBHOOK_ID: ${{ inputs.AMPLIFY_WEBHOOK_ID }}
         AWS_REGION:  ${{ inputs.AWS_REGION }}
       run: |
-        curl -X POST -d {} "https://webhooks.amplify.'$AWS_REGION'.amazonaws.com/prod/webhooks?id='$AMPLIFY_WEBHOOK_ID'&token='$AMPLIFY_WEBHOOK_TOKEN'&operation=startbuild" -H "Content-Type:application/json"
+        curl -X POST -d {} "https://webhooks.amplify.$AWS_REGION.amazonaws.com/prod/webhooks?id=$AMPLIFY_WEBHOOK_ID&token=$AMPLIFY_WEBHOOK_TOKEN&operation=startbuild" -H "Content-Type:application/json"
 
 
 
