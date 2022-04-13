@@ -22,6 +22,12 @@ on:
       AMPLIFY_WEBHOOK_ID:
         type: string
         required: false
+      Domain:
+        type: string
+        required: false
+      StaticDomain:
+        type: string
+        required: false
     secrets:
       AMPLIFY_TOKEN:
         required: true

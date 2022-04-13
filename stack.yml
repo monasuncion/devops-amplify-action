@@ -28,6 +28,11 @@ Parameters:
     Description: Domain name to host application
     Default: ""
 
+  StaticDomain:
+    Type: String
+    Description: Static Domain name to host static assets in S3
+    Default: "static-sat.smomni.com"
+
 Conditions: 
   UseCustomDomain: !Not [!Equals [!Ref Domain, ""]]
 
@@ -54,6 +59,40 @@ Resources:
       Repository: !Ref Repository
       OauthToken: !Ref OauthToken
       IAMServiceRole: !GetAtt AmplifyRole.Arn
+      CustomRules: 
+        - Source: "/ssr/eventdetail/<*>"
+          Status: "301"
+          Target: !Join ["", ["https://", !Ref Domain , "/eventdetail/<*>"]]
+        - Source: "/login"
+          Status: "301"
+          Target: !Join ["", ["https://", !Ref Domain , "auth/signin"]]
+        - Source: "/gift-registry-images/<*>"
+          Status: "200"
+          Target: !Join ["", ["https://", !Ref StaticDomain , "/gift-registry-images/<*>"]]
+        - Source: "/customer-images/<*>"
+          Status: "200"
+          Target: !Join ["", ["https://", !Ref StaticDomain , "/customer-images/<*>"]]
+        - Source: "/sku-temp-images/<*>"
+          Status: "200"
+          Target: !Join ["", ["https://", !Ref StaticDomain , "/sku-temp-images/<*>"]]
+        - Source: "/gift-wrap-images/<*>"
+          Status: "200"
+          Target: !Join ["", ["https://", !Ref StaticDomain , "/gift-wrap-images/<*>"]]
+        - Source: "/avatar/<*>"
+          Status: "200"
+          Target: !Join ["", ["https://", !Ref StaticDomain , "/avatar/<*>"]]
+        - Source: "/videos/<*>"
+          Status: "200"
+          Target: !Join ["", ["https://", !Ref StaticDomain , "/videos/<*>"]]
+        - Source: "/invoices/<*>"
+          Status: "200"
+          Target: !Join ["", ["https://", !Ref StaticDomain , "/invoices/<*>"]]
+        - Source: "/image-group/<*>"
+          Status: "200"
+          Target: !Join ["", ["https://", !Ref StaticDomain , "/image-group/<*>"]]
+        - Source: "/widget/<*>"
+          Status: "200"
+          Target: !Join ["", ["https://", !Ref StaticDomain , "/widget/<*>"]]
 
   AmplifyBranch:
     Type: AWS::Amplify::Branch
