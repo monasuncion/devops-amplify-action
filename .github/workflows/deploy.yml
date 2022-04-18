@@ -22,7 +22,7 @@ on:
       AMPLIFY_WEBHOOK_ID:
         type: string
         required: false
-      Domain:
+      DOMAIN_PREFIX:
         type: string
         required: false
       StaticDomain:
@@ -86,6 +86,7 @@ jobs:
           Branch=${{ steps.env-name.outputs.branch }},
           OauthToken=${{ secrets.AMPLIFY_TOKEN }},
           Domain=${{ inputs.AMPLIFY_DOMAIN }},
+          DomainPrefix=${{ inputs.DOMAIN_PREFIX }},
           Project=${{ steps.env-name.outputs.project }}
 
     - name: Print AMplify Environment Default Domain

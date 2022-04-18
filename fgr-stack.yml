@@ -28,6 +28,11 @@ Parameters:
     Description: Domain name to host application
     Default: ""
 
+  DomainPrefix:
+    Type: String
+    Description: Domain prefix to host application
+    Default: "fgr-next-develop"
+
   StaticDomain:
     Type: String
     Description: Static Domain name to host static assets in S3
@@ -74,7 +79,7 @@ Resources:
       DomainName: !Ref Domain
       AppId: !GetAtt AmplifyApp.AppId
       SubDomainSettings:
-        - Prefix: master
+        - Prefix: !Ref DomainPrefix
           BranchName: !GetAtt AmplifyBranch.BranchName
 
 Outputs:
